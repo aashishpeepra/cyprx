@@ -14,6 +14,8 @@ import time
 import sys
 from datetime import date, datetime
 
+
+
 twilioObj = TwilioClient(os.getenv("TWILIO_SID"), os.getenv("TWILIO_TOKEN")) 
 totalRequests = 2
 maximumRequests = 90000
