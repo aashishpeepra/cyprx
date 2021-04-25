@@ -15,7 +15,8 @@ import sys
 from datetime import date, datetime
 
 twilioObj = TwilioClient(os.getenv("TWILIO_SID"), os.getenv("TWILIO_TOKEN")) 
-
+totalRequests = 2
+maximumRequests = 90000
 def send_message(object,message):
     msg = object.messages.create( 
                               from_='whatsapp:+14155238886',  
@@ -82,6 +83,7 @@ if len(orders)==1:
     while client.get_order(symbol=CURRENCY,orderId = orders[0]["orderId"])["status"] == "NEW":
         print("Waiting for {} order to finish at price {} | {} seconds".format(orders[0]["side"],orders[0]["price"],int(time.time())-startTime))
         time.sleep(0.9)
+        totalRequests+=1
     print("Last order processed | continue",orders[0])
     anyPendingOrder = True
 elif len(orders)>1:
@@ -196,6 +198,8 @@ def trade(eachTrade):
                         
                         while client.get_order(symbol=CURRENCY,orderId = order1["orderId"])["status"] == "NEW":
                             print("processing...")
+                            time.sleep(0.9)
+                            totalRequests+=1
                         print("Sold at at {}",eachTrade["p"])
                         send_whatsapp_message("✅ SELLING CRYPTO DONE\n"+return_order_details(order1))
                         balance+=round(temp*qty,5)
@@ -239,6 +243,8 @@ def trade(eachTrade):
                             break
                         print("Remaining ",endTime-startTime," seconds")
                         startTime = int(time.time())
+                        time.sleep(0.9)
+                        totalRequests+=1
                     if becauseOfTime:
                         result = client.cancel_order(
                         symbol=CURRENCY,
@@ -256,7 +262,7 @@ def trade(eachTrade):
                 l = 0
 
     # print(each)
-bm = BinanceSocketManager(client, user_timeout=60)
+bm = BinanceSocketManager(client)
 
 # print( client.get_symbol_info(CURRENCY)['filters'][:])
 # clientCore.show_account_details("DOGE")
@@ -284,6 +290,7 @@ bm.start()
 
 def end_results():
     bm.close()
+    send_whatsapp_message("Killing the instance. Have a great day!!"+str(totalRequests))
     destroy()
 
 
