@@ -9,4 +9,4 @@ app.config.from_object(app_settings)
 
 @app.route("/",methods=["GET"])
 def home():
-    return json({"header":"Starting the server"})
+    return str(rounder(1.23))
